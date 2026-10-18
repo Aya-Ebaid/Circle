@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile | Circle</title>
+  <link rel="stylesheet" href="/bootstrap-icons-1.10.5/font/bootstrap-icons.min.css">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f1f3fa;
+      color: #1f2340;
+      min-height: 100vh;
+    }
+
+    a { text-decoration: none; }
+
+    /* ===== الشريط العلوي ===== */
+    .topbar {
+      background: #1f2340;
+      padding: 14px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand i { color: #a78bfa; font-size: 1.6rem; }
+
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+
+    .top-btn {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+
+    .top-btn:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* ===== الحاوية ===== */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto 50px;
+      padding: 0 20px;
+    }
+
+    /* ===== الغلاف + الأفاتار ===== */
+    .cover {
+      height: 190px;
+      border-radius: 0 0 28px 28px;
+      background: linear-gradient(120deg, #712cf9 0%, #4f46e5 50%, #2563eb 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before, .cover::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .cover::before { width: 260px; height: 260px; top: -100px; right: 60px; }
+    .cover::after  { width: 180px; height: 180px; bottom: -80px; right: 260px; }
+
+    .user-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 22px;
+      padding: 0 30px;
+      margin-top: -55px;
+      position: relative;
+    }
+
+    .avatar {
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      background: #fff;
+      border: 6px solid #f1f3fa;
+      color: #712cf9;
+      font-size: 3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      box-shadow: 0 8px 25px rgba(60, 60, 120, 0.2);
+      flex-shrink: 0;
+    }
+    .avatar { position: relative; overflow: hidden; }
+    .avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+    .user-info { padding-bottom: 12px; }
+    .user-info h1 { margin: 0; font-size: 1.7rem; }
+    .user-info p { margin: 4px 0 0; color: #6b7090; }
+
+    /* ===== الشبكة ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 6px 24px rgba(60, 60, 120, 0.07);
+    }
+
+    .card h3 {
+      margin: 0 0 20px;
+      font-size: 1.1rem;
+    }
+
+    /* ===== الإحصائيات ===== */
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #eef0f7;
+    }
+
+    .stat:last-child { border-bottom: none; padding-bottom: 0; }
+    .stat:first-of-type { padding-top: 0; }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #efe8ff;
+      color: #712cf9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .stat .number { font-size: 1.35rem; font-weight: 700; line-height: 1.1; }
+    .stat .label { color: #6b7090; font-size: 0.85rem; }
+
+    /* ===== الفورم ===== */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .field { margin-bottom: 18px; }
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #3a3f5c;
+      margin-bottom: 7px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1.5px solid #e1e4f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: 0.2s;
+      background: #fff;
+    }
+
+    .field input:focus {
+      border-color: #712cf9;
+      box-shadow: 0 0 0 4px rgba(113, 44, 249, 0.12);
+    }
+
+    .field input:disabled { background: #f4f6fb; color: #8a8fa8; }
+
+    .btn-save {
+      background: linear-gradient(135deg, #712cf9, #4f46e5);
+      color: #fff;
+      border: none;
+      padding: 13px 30px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(113, 44, 249, 0.35);
+    }
+
+    /* ===== موبايل ===== */
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .user-row { flex-direction: column; align-items: center; text-align: center; padding: 0; }
+      .topbar { padding: 14px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- الشريط العلوي -->
+  <div class="topbar">
+    <a href="/" class="brand"><i class="bi bi-bullseye"></i> Circle</a>
+    <div class="top-actions">
+      <a href="/" class="top-btn"><i class="bi bi-house"></i> Home</a>
+      <form action="/logout" method="POST" style="margin:0;">
+        <button type="submit" class="top-btn"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- الغلاف -->
+    <div class="cover"></div>
+
+    <!-- الاسم والصورة -->
+    <div class="user-row">
+        <div class="avatar">
+        <span><%= (currentUser.name || currentUser.email).charAt(0) %></span>
+        <img src="/img/A.jpg" alt="Profile" onerror="this.style.display='none'">
+        </div>      <div class="user-info">
+        <h1><%= currentUser.name || "Welcome!" %></h1>
+        <p><i class="bi bi-envelope"></i> <%= currentUser.email %></p>
+        <% if (currentUser.company) { %>
+          <p><i class="bi bi-building"></i> <%= currentUser.company %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <!-- العمود الجانبي: الإحصائيات -->
+      <div class="card">
+        <h3>Overview</h3>
+
+        <div class="stat">
+          <div class="stat-icon"><i class="bi bi-people"></i></div>
+          <div>
+            <div class="number"><%= customersCount %></div>
+            <div class="label">Total customers</div>
+          </div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+          <div>
+            <div class="number"><%= moment(currentUser.createdAt).format("MMM YYYY") %></div>
+            <div class="label">Member since</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- العمود الرئيسي: تعديل البيانات -->
+      <div class="card">
+        <h3>Edit profile</h3>
+
+        <form action="/profile?_method=PUT" method="POST">
+          <div class="form-row">
+            <div class="field full">
+              <label>Name</label>
+              <input type="text" name="name" placeholder="Your full name" value="<%= currentUser.name %>">
+            </div>
+
+            <div class="field">
+              <label>Phone</label>
+              <input type="text" name="phone" placeholder="01xxxxxxxxx" value="<%= currentUser.phone %>">
+            </div>
+
+            <div class="field">
+              <label>Company</label>
+              <input type="text" name="company" placeholder="Company name" value="<%= currentUser.company %>">
+            </div>
+
+            <div class="field full">
+              <label>Email</label>
+              <input type="email" value="<%= currentUser.email %>" disabled>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-save">
+            <i class="bi bi-check2-circle"></i> Save changes
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

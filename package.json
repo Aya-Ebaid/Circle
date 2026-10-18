@@ -1,0 +1,37 @@
+{
+  "name": "node-level1",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "",
+  "main": "index.ejs",
+  "scripts": {
+    "start": "node app.js",
+    "watch": "nodemon --ext js,ejs app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "commander": "^15.0.0",
+    "connect-livereload": "^0.6.1",
+    "connect-mongo": "^6.0.0",
+    "dotenv": "^18.0.8",
+    "ejs": "^7.0.1",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.1",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
+    "inquirer": "^14.2.3",
+    "livereload": "^0.10.3",
+    "method-override": "^3.0.0",
+    "moment": "^2.31.0",
+    "mongodb": "^7.7.0",
+    "mongoose": "^9.11.2",
+    "start": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

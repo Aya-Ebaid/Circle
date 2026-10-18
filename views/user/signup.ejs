@@ -1,0 +1,59 @@
+<% const err = typeof error !== "undefined" ? error : null; %>
+<% const mail = typeof email !== "undefined" ? email : ""; %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign up | Circle</title>
+  <link rel="stylesheet" href="/bootstrap-icons-1.10.5/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+
+    <div class="auth-hero">
+      <div class="brand"><i class="bi bi-bullseye"></i> Circle</div>
+      <h1>Start organizing<br>your customers today.</h1>
+      <p>Create your free account and build your own private customer list in less than a minute.</p>
+      <ul class="hero-points">
+        <li><i class="bi bi-check-circle-fill"></i> Free and easy to use</li>
+        <li><i class="bi bi-check-circle-fill"></i> Your own personal dashboard</li>
+        <li><i class="bi bi-check-circle-fill"></i> Secure password protection</li>
+      </ul>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="auth-card">
+        <h2>Create account </h2>
+        <div class="subtitle">It only takes a few seconds</div>
+
+        <% if (err) { %>
+          <div class="auth-error"><i class="bi bi-exclamation-circle"></i> <%= err %></div>
+        <% } %>
+
+        <form action="/signup" method="POST">
+          <label>Email</label>
+          <div class="input-group-custom">
+            <i class="bi bi-envelope"></i>
+            <input type="email" name="email" placeholder="you@example.com" value="<%= mail %>" required>
+          </div>
+
+          <label>Password</label>
+          <div class="input-group-custom">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password" placeholder="At least 8 characters" minlength="8" required>
+          </div>
+
+          <button type="submit" class="btn-auth">Create account</button>
+        </form>
+
+        <div class="auth-switch">
+          Already have an account? <a href="/signin">Sign in</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
