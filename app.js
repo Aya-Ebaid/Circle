@@ -33,8 +33,32 @@ const authLimiter = rateLimit({
     res.status(429).send("Too many attempts. Please try again in 15 minutes."),
 });
 
+// ================= MongoDB connection =================
+// الاتصال بيتحفظ عشان Vercel ميفتحوش من جديد مع كل طلب
+let connectionPromise = null;
+function connectDB() {
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(process.env.MONGO_URL).catch((err) => {
+      connectionPromise = null;
+      throw err;
+    });
+  }
+  return connectionPromise;
+}
+
 app.set("view engine", "ejs");
 app.use(express.static("public"));
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("DB connection error:", err);
+    res.status(500).send("Database connection error");
+  }
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
@@ -49,6 +73,7 @@ app.use(
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URL,
       collectionName: "sessions",
+      touchAfter: 24 * 3600,
     }),
     cookie: {
       httpOnly: true,
@@ -64,19 +89,28 @@ app.use(async (req, res, next) => {
   res.locals.currentUser = null;
   if (req.session.userId) {
     try {
-    res.locals.currentUser = await User.findById(req.session.userId).select("-password -avatar.data");    } catch (err) {
+      res.locals.currentUser = await User.findById(req.session.userId).select(
+        "-password -avatar.data"
+      );
+    } catch (err) {
       console.error(err);
     }
   }
   next();
 });
 
-// الحماية
+// ================= الحماية =================
 function requireLogin(req, res, next) {
-  if (!req.session.userId) {
-    return res.redirect("/signin");
+  if (req.session.userId && res.locals.currentUser) return next();
+
+  // جلسة موجودة بس اليوزر اتمسح (حساب ديمو انتهى مثلاً)
+  if (req.session.userId) {
+    return req.session.destroy(() => {
+      res.clearCookie("connect.sid");
+      res.redirect("/signin");
+    });
   }
-  next();
+  res.redirect("/signin");
 }
 
 const publicPaths = ["/signin", "/signup", "/demo"];
@@ -85,8 +119,8 @@ app.use((req, res, next) => {
   requireLogin(req, res, next);
 });
 
-// Livereload (development only)
-if (process.env.NODE_ENV !== "production") {
+// Livereload (على جهازك بس)
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const livereload = require("livereload");
   const connectLivereload = require("connect-livereload");
 
@@ -101,7 +135,7 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-// Auth
+// ================= Auth =================
 
 app.get("/signin", (req, res) => {
   res.render("user/signin", { error: null, email: "" });
@@ -111,7 +145,7 @@ app.post("/signin", authLimiter, async (req, res) => {
   const email = (req.body.email || "").trim().toLowerCase();
   try {
     const user = await User.findOne({ email });
-    const isMatch = user && (await bcrypt.compare(req.body.password, user.password));
+    const isMatch = user && (await bcrypt.compare(req.body.password || "", user.password));
 
     if (!isMatch) {
       return res.status(401).render("user/signin", {
@@ -179,7 +213,7 @@ app.post("/logout", (req, res) => {
   });
 });
 
-//  Demo account 
+// ================= Demo account =================
 const demoCustomers = [
   { firstName: "Sara", lastName: "Hassan", email: "sara.hassan@example.com", telephone: "01012345678", age: 29, gender: "Female", country: "Egypt" },
   { firstName: "Omar", lastName: "Khaled", email: "omar.khaled@example.com", telephone: "01123456789", age: 34, gender: "Male", country: "Egypt" },
@@ -219,7 +253,7 @@ app.post("/demo", authLimiter, async (req, res) => {
   }
 });
 
-// Profile 
+// ================= Profile =================
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
@@ -298,35 +332,7 @@ app.delete("/profile/avatar", async (req, res) => {
   }
 });
 
-
-//  Profile & Settings 
-
-app.get("/profile", async (req, res) => {
-  try {
-    const customersCount = await Customer.countDocuments({ user: req.session.userId });
-    res.render("user/profile", { customersCount });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error loading profile");
-  }
-});
-
-app.put("/profile", async (req, res) => {
-  try {
-    const { name, phone, company } = req.body;
-    await User.updateOne({ _id: req.session.userId }, { name, phone, company });
-    res.redirect("/profile");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error updating profile");
-  }
-});
-
-app.get("/settings", (req, res) => {
-  res.render("user/settings");
-});
-
-// Customers 
+// ================= Customers =================
 
 app.get("/", (req, res) => {
   Customer.find({ user: req.session.userId })
@@ -341,12 +347,19 @@ app.get("/user/add.html", (req, res) => {
   res.render("user/add");
 });
 
-
+// صفحة التعديل (بتطبع أي error في الـ terminal)
 app.get("/edit/:id", (req, res) => {
   Customer.findOne({ _id: req.params.id, user: req.session.userId })
     .then((result) => {
       if (!result) return res.status(404).send("Customer not found");
-      res.render("user/edit", { arr: result });
+
+      res.render("user/edit", { arr: result }, (err, html) => {
+        if (err) {
+          console.error("EDIT RENDER ERROR:", err.message);
+          return res.status(500).send("<pre>" + err.message + "</pre>");
+        }
+        res.send(html);
+      });
     })
     .catch((err) => {
       console.error(err);
@@ -367,7 +380,6 @@ app.get("/user/:id", (req, res) => {
     });
 });
 
-// add Customers
 app.post("/user/add.html", (req, res) => {
   const { firstName, lastName, email, telephone, age, gender, country } = req.body;
   Customer.create({
@@ -387,7 +399,6 @@ app.post("/user/add.html", (req, res) => {
     });
 });
 
-// edit Customers
 app.put("/edit/:id", (req, res) => {
   const { firstName, lastName, email, telephone, age, gender, country } = req.body;
   Customer.updateOne(
@@ -401,7 +412,6 @@ app.put("/edit/:id", (req, res) => {
     });
 });
 
-// delete Customers
 app.delete("/delete/:id", (req, res) => {
   Customer.deleteOne({ _id: req.params.id, user: req.session.userId })
     .then(() => res.redirect("/"))
@@ -411,9 +421,8 @@ app.delete("/delete/:id", (req, res) => {
     });
 });
 
-// search
 app.post("/search", (req, res) => {
-  const term = req.body.search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const term = (req.body.search || "").trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   Customer.find({
     user: req.session.userId,
     firstName: { $regex: term, $options: "i" },
@@ -425,16 +434,19 @@ app.post("/search", (req, res) => {
     });
 });
 
-//  MongoDB + Server
-
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(port, () => {
-      console.log(`Server running at ${process.env.NODE_ENV || "development"} mode on port ${port}`);
+// ================= Server =================
+// على جهازك: شغّل السيرفر عادي. على Vercel: لأ (بيستخدم app مباشرة)
+if (!process.env.VERCEL) {
+  connectDB()
+    .then(() => {
+      console.log("Connected to MongoDB");
+      app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+      });
+    })
+    .catch((err) => {
+      console.error("Error connecting to MongoDB:", err);
     });
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
-  });
+}
+
+module.exports = app;
