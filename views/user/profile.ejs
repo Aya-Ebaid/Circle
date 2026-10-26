@@ -1,3 +1,4 @@
+<% const hasPhoto = currentUser.avatar && currentUser.avatar.contentType; %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +19,6 @@
 
     a { text-decoration: none; }
 
-    /* ===== الشريط العلوي ===== */
     .topbar {
       background: #1f2340;
       padding: 14px 40px;
@@ -54,14 +54,12 @@
 
     .top-btn:hover { background: rgba(255, 255, 255, 0.25); }
 
-    /* ===== الحاوية ===== */
     .container {
       max-width: 1000px;
       margin: 0 auto 50px;
       padding: 0 20px;
     }
 
-    /* ===== الغلاف + الأفاتار ===== */
     .cover {
       height: 190px;
       border-radius: 0 0 28px 28px;
@@ -88,9 +86,17 @@
       position: relative;
     }
 
-    .avatar {
+    .avatar-wrap {
+      position: relative;
       width: 118px;
       height: 118px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
       background: #fff;
       border: 6px solid #f1f3fa;
@@ -102,22 +108,50 @@
       justify-content: center;
       text-transform: uppercase;
       box-shadow: 0 8px 25px rgba(60, 60, 120, 0.2);
-      flex-shrink: 0;
+      overflow: hidden;
     }
-    .avatar { position: relative; overflow: hidden; }
-    .avatar img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .cam-btn {
+      position: absolute;
+      right: 0;
+      bottom: 4px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #712cf9;
+      color: #fff;
+      border: 3px solid #f1f3fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: 0.2s;
+    }
+
+    .avatar-wrap:hover .cam-btn {
+      background: #5a23c8;
+      transform: scale(1.12);
+    }
 
     .user-info { padding-bottom: 12px; }
     .user-info h1 { margin: 0; font-size: 1.7rem; }
     .user-info p { margin: 4px 0 0; color: #6b7090; }
 
-    /* ===== الشبكة ===== */
+    .link-remove {
+      margin-top: 8px;
+      background: none;
+      border: none;
+      color: #b42318;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .link-remove:hover { text-decoration: underline; }
+
     .grid {
       display: grid;
       grid-template-columns: 300px 1fr;
@@ -137,7 +171,6 @@
       font-size: 1.1rem;
     }
 
-    /* ===== الإحصائيات ===== */
     .stat {
       display: flex;
       align-items: center;
@@ -146,8 +179,8 @@
       border-bottom: 1px solid #eef0f7;
     }
 
-    .stat:last-child { border-bottom: none; padding-bottom: 0; }
     .stat:first-of-type { padding-top: 0; }
+    .stat:last-child { border-bottom: none; padding-bottom: 0; }
 
     .stat-icon {
       width: 48px;
@@ -164,7 +197,6 @@
     .stat .number { font-size: 1.35rem; font-weight: 700; line-height: 1.1; }
     .stat .label { color: #6b7090; font-size: 0.85rem; }
 
-    /* ===== الفورم ===== */
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -219,7 +251,6 @@
       box-shadow: 0 8px 20px rgba(113, 44, 249, 0.35);
     }
 
-    /* ===== موبايل ===== */
     @media (max-width: 800px) {
       .grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
@@ -230,7 +261,6 @@
 </head>
 <body>
 
-  <!-- الشريط العلوي -->
   <div class="topbar">
     <a href="/" class="brand"><i class="bi bi-bullseye"></i> Circle</a>
     <div class="top-actions">
@@ -241,28 +271,42 @@
     </div>
   </div>
 
+  <form id="avatarForm" action="/profile/avatar" method="POST" enctype="multipart/form-data" style="display:none;">
+    <input type="file" id="avatarInput" name="avatar" accept="image/png,image/jpeg,image/webp">
+  </form>
+
   <div class="container">
 
-    <!-- الغلاف -->
     <div class="cover"></div>
 
-    <!-- الاسم والصورة -->
     <div class="user-row">
+      <div class="avatar-wrap" title="Change photo" onclick="document.getElementById('avatarInput').click()">
         <div class="avatar">
-        <span><%= (currentUser.name || currentUser.email).charAt(0) %></span>
-        <img src="/img/A.jpg" alt="Profile" onerror="this.style.display='none'">
-        </div>      <div class="user-info">
+          <% if (hasPhoto) { %>
+            <img src="/profile/avatar?v=<%= currentUser.updatedAt.getTime() %>" alt="Profile">
+          <% } else { %>
+            <%= (currentUser.name || currentUser.email).charAt(0) %>
+          <% } %>
+        </div>
+        <div class="cam-btn"><i class="bi bi-camera-fill"></i></div>
+      </div>
+
+      <div class="user-info">
         <h1><%= currentUser.name || "Welcome!" %></h1>
         <p><i class="bi bi-envelope"></i> <%= currentUser.email %></p>
         <% if (currentUser.company) { %>
           <p><i class="bi bi-building"></i> <%= currentUser.company %></p>
+        <% } %>
+        <% if (hasPhoto) { %>
+          <form action="/profile/avatar?_method=DELETE" method="POST" style="margin:0;">
+            <button type="submit" class="link-remove"><i class="bi bi-trash"></i> Remove photo</button>
+          </form>
         <% } %>
       </div>
     </div>
 
     <div class="grid">
 
-      <!-- العمود الجانبي: الإحصائيات -->
       <div class="card">
         <h3>Overview</h3>
 
@@ -283,7 +327,6 @@
         </div>
       </div>
 
-      <!-- العمود الرئيسي: تعديل البيانات -->
       <div class="card">
         <h3>Edit profile</h3>
 
@@ -318,6 +361,19 @@
 
     </div>
   </div>
+
+  <script>
+    document.getElementById("avatarInput").addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image must be smaller than 2MB");
+        this.value = "";
+        return;
+      }
+      document.getElementById("avatarForm").submit();
+    });
+  </script>
 
 </body>
 </html>

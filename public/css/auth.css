@@ -13,7 +13,6 @@ body {
   min-height: 100vh;
 }
 
-/* ===== الجزء الملوّن ===== */
 .auth-hero {
   flex: 1.1;
   background: linear-gradient(135deg, #712cf9 0%, #4f46e5 55%, #2563eb 100%);
@@ -107,7 +106,6 @@ body {
   color: #a5f3c4;
 }
 
-/* ===== الفورم ===== */
 .auth-form-side {
   flex: 1;
   display: flex;
@@ -220,7 +218,6 @@ body {
   text-decoration: underline;
 }
 
-/* ===== موبايل ===== */
 @media (max-width: 860px) {
   .auth-wrapper {
     flex-direction: column;
@@ -234,4 +231,39 @@ body {
   .hero-points {
     display: none;
   }
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+  color: #9aa0bd;
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e1e4f0;
+}
+
+.btn-demo {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid #712cf9;
+  background: #fff;
+  color: #712cf9;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.2s;
+}
+
+.btn-demo:hover {
+  background: #f4efff;
 }

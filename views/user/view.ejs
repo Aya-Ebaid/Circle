@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
   <head>
-    <script src="../js/color-modes.js"></script>
+    <script src="/js/color-modes.js"></script>
     <link
       rel="stylesheet"
-      href="../bootstrap-icons-1.10.5/font/bootstrap-icons.min.css"
+      href="/bootstrap-icons-1.10.5/font/bootstrap-icons.min.css"
     />
-    <link rel="shortcut icon" href="../img/ali.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/img/A.jpg" type="image/x-icon">
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,9 +16,9 @@
       content="Mark Otto, Jacob Thornton, and Bootstrap contributors"
     />
     <meta name="generator" content="Hugo 0.112.5" />
-    <title>Edit page</title>
+    <title>Customer Details | Circle</title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
       .bd-placeholder-img {
@@ -96,8 +96,8 @@
     </style>
 
     <!-- Custom styles for this template -->
-    <link href="../css/sidebars.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/myStyle.css" />
+    <link href="/css/sidebars.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/myStyle.css" />
   </head>
   <body>
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
@@ -229,7 +229,7 @@
         <hr />
         <ul class="nav nav-pills flex-column mb-auto">
           <li class="nav-item">
-            <a href="/" class="nav-link  text-white" aria-current="page">
+            <a href="/" class="nav-link text-white" aria-current="page">
               <svg class="bi pe-none me-2" width="16" height="16">
                 <use xlink:href="#home" />
               </svg>
@@ -238,7 +238,7 @@
           </li>
 
           <li>
-            <a href="./user/add.html" class="nav-link text-white">
+            <a href="/user/add.html" class="nav-link text-white">
               <svg class="bi pe-none me-2" width="16" height="16">
                 <use xlink:href="#people-circle" />
               </svg>
@@ -247,26 +247,28 @@
           </li>
         </ul>
         <hr />
-        <div class="dropdown">
+        <div class="dropdown dropup">
           <a
             href="#"
             class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <img
-              src="./img/me.JPG"
-              alt=""
-              width="32"
-              height="32"
-              class="rounded-circle me-2"
-            />
-            <strong class="sidebar-text">   <%= currentUser.name || currentUser.email %></strong>
+            <% if (currentUser.avatar && currentUser.avatar.contentType) { %>
+            <img src="/profile/avatar?v=<%= currentUser.updatedAt.getTime() %>" alt="Profile" width="32" height="32" class="rounded-circle me-2" style="object-fit:cover;">
+            <% } else { %>
+            <span class="rounded-circle me-2 d-inline-flex align-items-center justify-content-center bg-secondary text-white" style="width:32px;height:32px;"><%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %></span>
+            <% } %>
+            <strong class="sidebar-text"><%= currentUser.name || currentUser.email %></strong>
           </a>
           <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-            <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><a class="dropdown-item" href="/profile">Profile</a></li>
             <li><hr class="dropdown-divider" /></li>
-            <li><a class="dropdown-item" href="#">Sign out</a></li>
+            <li>
+              <form action="/logout" method="POST" class="m-0">
+                <button type="submit" class="dropdown-item">Logout</button>
+              </form>
+            </li>
           </ul>
         </div>
       </div>
@@ -278,9 +280,9 @@
           <div
             class="container-fluid justify-content-center justify-content-md-between"
           >
-
-            <form class="d-flex" role="search">
+            <form action="/search" method="post" class="d-flex" role="search">
               <input
+                name="search"
                 class="form-control me-2"
                 type="search"
                 placeholder="Search"
@@ -301,11 +303,11 @@
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
             <li class="breadcrumb-item active" aria-current="page">
-            <%= arr.firstName %> <%= arr.lastName %>
+              <%= arr.firstName %> <%= arr.lastName %>
             </li>
           </ol>
 
-          <p class=" ">
+          <p>
             <span class="fw-medium fs-6">Id :</span>
             <%= arr._id %>
           </p>
@@ -354,22 +356,20 @@
 
             <tr>
               <th scope="row">Created on</th>
-                <td><%= moment(arr.createdAt).fromNow() %></td>  
+              <td><%= moment(arr.createdAt).fromNow() %></td>
             </tr>
 
             <tr>
               <th scope="row">Last Update</th>
-              <td><%= moment(arr.updatedAt).fromNow() %></td>  
-
-                            
+              <td><%= moment(arr.updatedAt).fromNow() %></td>
             </tr>
           </tbody>
         </table>
       </section>
     </main>
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
 
-    <script src="../js/sidebars.js"></script>
-    <script src="../js/main.js"></script>
+    <script src="/js/sidebars.js"></script>
+    <script src="/js/main.js"></script>
   </body>
 </html>

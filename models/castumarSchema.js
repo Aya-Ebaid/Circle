@@ -14,8 +14,9 @@ const customerSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    expireAt: { type: Date },
   },
   { timestamps: true }
 );
-
+customerSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 module.exports = mongoose.model("Customer", customerSchema);

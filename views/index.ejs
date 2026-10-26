@@ -147,7 +147,11 @@
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <img src="/img/A.jpg" alt="Profile" width="32" height="32" class="rounded-circle me-2" />
+            <% if (currentUser.avatar && currentUser.avatar.contentType) { %>
+   <img src="/profile/avatar?v=<%= currentUser.updatedAt.getTime() %>" alt="Profile" width="32" height="32" class="rounded-circle me-2" style="object-fit:cover;">
+   <% } else { %>
+   <span class="rounded-circle me-2 d-inline-flex align-items-center justify-content-center bg-secondary text-white" style="width:32px;height:32px;"><%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %></span>
+   <% } %>
             <strong class="sidebar-text"><%= currentUser.name || currentUser.email %></strong>
           </a>
 
