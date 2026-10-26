@@ -33,8 +33,7 @@ const authLimiter = rateLimit({
     res.status(429).send("Too many attempts. Please try again in 15 minutes."),
 });
 
-// ================= MongoDB connection =================
-// الاتصال بيتحفظ عشان Vercel ميفتحوش من جديد مع كل طلب
+//  MongoDB connection
 let connectionPromise = null;
 function connectDB() {
   if (!connectionPromise) {
@@ -84,7 +83,6 @@ app.use(
   })
 );
 
-// بيانات اليوزر متاحة في كل الصفحات
 app.use(async (req, res, next) => {
   res.locals.currentUser = null;
   if (req.session.userId) {
@@ -99,11 +97,9 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ================= الحماية =================
 function requireLogin(req, res, next) {
   if (req.session.userId && res.locals.currentUser) return next();
 
-  // جلسة موجودة بس اليوزر اتمسح (حساب ديمو انتهى مثلاً)
   if (req.session.userId) {
     return req.session.destroy(() => {
       res.clearCookie("connect.sid");
@@ -119,7 +115,6 @@ app.use((req, res, next) => {
   requireLogin(req, res, next);
 });
 
-// Livereload (على جهازك بس)
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const livereload = require("livereload");
   const connectLivereload = require("connect-livereload");
@@ -135,7 +130,7 @@ if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   });
 }
 
-// ================= Auth =================
+//  Auth
 
 app.get("/signin", (req, res) => {
   res.render("user/signin", { error: null, email: "" });
@@ -213,7 +208,7 @@ app.post("/logout", (req, res) => {
   });
 });
 
-// ================= Demo account =================
+//  Demo account
 const demoCustomers = [
   { firstName: "Sara", lastName: "Hassan", email: "sara.hassan@example.com", telephone: "01012345678", age: 29, gender: "Female", country: "Egypt" },
   { firstName: "Omar", lastName: "Khaled", email: "omar.khaled@example.com", telephone: "01123456789", age: 34, gender: "Male", country: "Egypt" },
@@ -233,7 +228,6 @@ app.post("/demo", authLimiter, async (req, res) => {
     const user = await User.create({
       name: "Demo Visitor",
       email: `demo-${id}@circle-demo.local`,
-      // باسورد عشوائي محدش يعرفه، فالحساب ده مينفعش يتدخله غير من الزرار
       password: await bcrypt.hash(crypto.randomBytes(24).toString("hex"), 10),
       expireAt,
     });
@@ -253,7 +247,7 @@ app.post("/demo", authLimiter, async (req, res) => {
   }
 });
 
-// ================= Profile =================
+// Profile 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
@@ -332,7 +326,7 @@ app.delete("/profile/avatar", async (req, res) => {
   }
 });
 
-// ================= Customers =================
+//  Customers 
 
 app.get("/", (req, res) => {
   Customer.find({ user: req.session.userId })
@@ -347,7 +341,6 @@ app.get("/user/add.html", (req, res) => {
   res.render("user/add");
 });
 
-// صفحة التعديل (بتطبع أي error في الـ terminal)
 app.get("/edit/:id", (req, res) => {
   Customer.findOne({ _id: req.params.id, user: req.session.userId })
     .then((result) => {
@@ -367,7 +360,6 @@ app.get("/edit/:id", (req, res) => {
     });
 });
 
-// عرض عميل (لازم يفضل بعد /user/add.html)
 app.get("/user/:id", (req, res) => {
   Customer.findOne({ _id: req.params.id, user: req.session.userId })
     .then((result) => {
@@ -434,8 +426,7 @@ app.post("/search", (req, res) => {
     });
 });
 
-// ================= Server =================
-// على جهازك: شغّل السيرفر عادي. على Vercel: لأ (بيستخدم app مباشرة)
+// Server 
 if (!process.env.VERCEL) {
   connectDB()
     .then(() => {
